@@ -5,18 +5,28 @@ const Stage = class {
     prop(this, { last, min, max, listener });
   }
   clear() {
-    this.curr = 0;
+    this.stage = 0;
     this.next();
   }
+  _speed() {
+    const rate = (this.stage - 1) / (this.last - 1);
+    this.speed = this.min + (this.max - this.min) * (1 - rate);
+    // this.speed = 500 - (450 * this.stage) / this.last;
+  }
+  _count() {
+    this.count = 10 + 3 * this.stage;
+  }
   next() {
-    if (this.curr++ < Stage.last) {
-      const rate = (this.curr - 1) / (this.last - 1);
-      this.speed = this.min + (this.max - this.min) * (1 - rate);
+    if (this.stage++ < this.last) {
+      this._speed();
       this.listener();
     }
   }
   score(line) {
-    return parseInt(this.curr * 5 * 2 ** line);
+    return parseInt(this.stage * 5 * 2 ** line);
+  }
+  [Symbol.toPrimitive](h) {
+    return this.stage;
   }
 };
 
@@ -25,13 +35,16 @@ const Score = class {
     prop(this, { stage, listener });
   }
   clear() {
-    this.curr = this.total = 0;
+    this.score = this.total = 0;
   }
   add(line) {
     const score = this.stage.score(line);
-    this.curr += score;
+    this.score += score;
     this.total += score;
     this.listener();
+  }
+  [Symbol.toPrimitive](h) {
+    return `${this.curr},${this.total}`;
   }
 };
 
@@ -49,6 +62,13 @@ const Block = class {
     return this.blocks[this.rotate];
   }
 };
+
+// const c = (color, blocks) =>
+//   class extends Block {
+//     constructor() {
+//       super(color, blocks);
+//     }
+//   };
 
 const blocks = [
   class extends Block {
