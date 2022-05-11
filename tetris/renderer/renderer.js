@@ -3,8 +3,7 @@ import { prop } from '../util';
 
 export const Renderer = class {
   constructor(col, row) {
-    prop(this, { col, row, blocks: [] });
-    while (row--) this.blocks.push([]);
+    prop(this, { col, row });
   }
   clear() {
     throw 'override';

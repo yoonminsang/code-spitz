@@ -1,6 +1,6 @@
 import { prop } from './util';
 
-const Score = class {
+export const Score = class {
   constructor(stage, listener) {
     prop(this, { stage, listener });
   }

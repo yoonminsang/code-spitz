@@ -1,10 +1,10 @@
 import { createElement, setBackgroundColor } from '../util';
 import { Renderer } from './renderer';
 
-const TableRenderer = class extends Renderer {
-  constructor(base, back, col, row) {
+export const TableRenderer = class extends Renderer {
+  constructor(base, backgroundColor, col, row) {
     super(col, row);
-    this.back = back;
+    this.backgroundColor = backgroundColor;
     while (row--) {
       const tr = base.appendChild(createElement('tr')),
         curr = [];
@@ -15,9 +15,35 @@ const TableRenderer = class extends Renderer {
     this.clear();
   }
   clear() {
-    this.blocks.forEach((curr) => curr.foReach((s) => setBackgroundColor(s, this.back)));
+    this.blocks.forEach((block) => block.forEach((s) => setBackgroundColor(s, this.backgroundColor)));
   }
   _render(v) {
-    this.blocks.forEach((curr, row) => curr.forEach((s, col) => setBackgroundColor(s, v[row][col])));
+    this.blocks.forEach((block, row) => block.forEach((s, col) => setBackgroundColor(s, v[row][col])));
   }
 };
+
+// const TableRenderer2 = (_) => {
+//   const el = (v) => document.createElement(v);
+//   const add = (p, c) => p.appendChild(typeof c === 'string' ? el(c) : c);
+//   const back = (s, v) => (s.backgroundColor = v);
+//   return class extends Renderer {
+//     constructor(col, row, back) {
+//       super(col, row, el('table'), back);
+//       const { base, blocks } = this;
+//       let { row: i } = this;
+//       while (i--) {
+//         const curr = [],
+//           tr = add(base, 'tr');
+//         let j = col;
+//         blocks.push(curr);
+//         while (j--) curr.push(add(tr, 'td').style);
+//       }
+//     }
+//     clear() {
+//       this.blocks.forEach((block) => block.forEach((s) => back(s, this.back)));
+//     }
+//     _render(v) {
+//       this.blocks.forEach((block, row) => block.forEach((s, col) => back(s, v[row][col])));
+//     }
+//   };
+// };
