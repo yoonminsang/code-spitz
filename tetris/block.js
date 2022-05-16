@@ -1,6 +1,6 @@
-import { prop } from './util';
+import { prop } from './utils';
 
-export const Block = ((_) => {
+export const Block = (() => {
   const strToBlock = (v) => v.split(',').map((v) => v.split('|').map((v) => v.split('')));
   const makeBlock = (color, block) =>
     class extends Block {
@@ -17,10 +17,10 @@ export const Block = ((_) => {
       prop(this, { color, blocks, rotate: 0, count: blocks.length - 1 });
     }
     left() {
-      if (--this.rotate < 0) this.rotate = count;
+      if (--this.rotate < 0) this.rotate = this.count;
     }
     right() {
-      if (++this.rotate > count) this.rotate = 0;
+      if (++this.rotate > this.count) this.rotate = 0;
     }
     get block() {
       return this.blocks[this.rotate];
@@ -31,7 +31,51 @@ export const Block = ((_) => {
     '#FBD72B-11|11',
     '#B84A9C-010|111,10|11|10,111|010,01|11|01',
     '#00FF24-011|110,10|11|01,011|110,10|11|01',
-    // TODO: 추가해
+    '#FF1920-110|011,01|11|10,110|011,01|11|10',
+    '#2900FC-100|111,11|10|10,111|001,01|01|11',
+    '#FD7C31-001|111,10|10|11,111|100,11|01|01',
+  ].map((v) => makeBlock(...v.split('-')));
+  return Block;
+})();
+// new Block.blocks[0]으로 접근
+
+export const Block2 = (() => {
+  const makeBlock = (color, block) =>
+    class extends Block {
+      constructor() {
+        super(color, block);
+      }
+    };
+  const Block = class {
+    static block() {
+      return new this.blocks[parseInt(Math.random() * this.blocks.length)]();
+    }
+    constructor(color, blocks) {
+      prop(this, { color, blocks, rotate: 0, count: blocks.length - 1 });
+    }
+    left() {
+      if (--this.rotate < 0) this.rotate = this.count;
+    }
+    right() {
+      if (++this.rotate > this.count) this.rotate = 0;
+    }
+    get block() {
+      return this.blocks[this.rotate];
+    }
+  };
+  Block.blocks = [
+    { color: '#00C3ED', blocks: [[[1], [1], [1], [1]], [[1111]]] },
+    { color: '#FBD72B', blocks: [[11], [11]] },
+    {
+      color: '#B84A9C',
+      blocks: [
+        [[010], [111]],
+        [[10], [11], [10]],
+        [[111], [010]],
+        [[01], [11], [01]],
+      ],
+    },
+    // TODO: 추가
   ].map((v) => makeBlock(...v.split('-')));
   return Block;
 })();

@@ -1,4 +1,4 @@
-import { createElement, setBackgroundColor } from '../util';
+import { createElement, setBackgroundColor } from '../utils';
 import { Renderer } from './renderer';
 
 export const TableRenderer = class extends Renderer {
@@ -6,8 +6,8 @@ export const TableRenderer = class extends Renderer {
     super(col, row);
     this.backgroundColor = backgroundColor;
     while (row--) {
-      const tr = base.appendChild(createElement('tr')),
-        curr = [];
+      const tr = base.appendChild(createElement('tr'));
+      const curr = [];
       this.blocks.push(curr);
       let i = col;
       while (i--) curr.push(tr.appendChild(createElement('td')).style);

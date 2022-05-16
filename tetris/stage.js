@@ -1,4 +1,4 @@
-import { prop } from './util';
+import { prop } from './utils';
 
 export const Stage = class {
   constructor(last, minSpeed, maxSpeed, listener) {
@@ -26,7 +26,7 @@ export const Stage = class {
   score(line) {
     return parseInt(this.stage * 5 * 2 ** line);
   }
-  [Symbol.toPrimitive](h) {
+  [Symbol.toPrimitive]() {
     return this.stage;
   }
 };

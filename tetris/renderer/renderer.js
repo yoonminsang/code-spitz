@@ -1,5 +1,5 @@
 import { Data } from '../Data';
-import { prop } from '../util';
+import { prop } from '../utils';
 
 export const Renderer = class {
   constructor(col, row) {
