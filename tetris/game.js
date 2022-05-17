@@ -1,4 +1,4 @@
-const s = {};
+const state = {};
 'title,stageIntro,play,dead,stageClear,clear,ranking'.split(',').forEach((v) => (s[v] = Symbol()));
 const Game = class {
   [s.title]() {}
@@ -9,5 +9,5 @@ const Game = class {
   [s.clear]() {}
   [s.ranking]() {}
 };
-Object.entries(s).forEach(([k, v]) => (Game[k] = v));
+Object.entries(state).forEach(([str, symbol]) => (Game[str] = symbol));
 Object.freeze(Game);

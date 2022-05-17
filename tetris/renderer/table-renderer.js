@@ -22,28 +22,18 @@ export const TableRenderer = class extends Renderer {
   }
 };
 
-// const TableRenderer2 = (_) => {
-//   const el = (v) => document.createElement(v);
-//   const add = (p, c) => p.appendChild(typeof c === 'string' ? el(c) : c);
-//   const back = (s, v) => (s.backgroundColor = v);
-//   return class extends Renderer {
-//     constructor(col, row, back) {
-//       super(col, row, el('table'), back);
-//       const { base, blocks } = this;
-//       let { row: i } = this;
-//       while (i--) {
-//         const curr = [],
-//           tr = add(base, 'tr');
-//         let j = col;
-//         blocks.push(curr);
-//         while (j--) curr.push(add(tr, 'td').style);
-//       }
-//     }
-//     clear() {
-//       this.blocks.forEach((block) => block.forEach((s) => back(s, this.back)));
-//     }
-//     _render(v) {
-//       this.blocks.forEach((block, row) => block.forEach((s, col) => back(s, v[row][col])));
-//     }
-//   };
-// };
+// const t = new TableRenderer(5, 5, 'red');
+// t.base.style.cssText = `
+// width:500px;height:500px;border:0px;
+// border-spacing:0;border-collapse:collapse
+// `;
+// document.body.appendChild(t.base);
+// t.render(
+//   new Data(5, 5).all(
+//     ['#0f0', '#f00', '#00f', '#ff0', '#0ff'],
+//     ['#f00', '#f00', '#00f', '#ff0', '#0f0'],
+//     ['#0f0', '#f00', '#00f', '#ff0', '#0ff'],
+//     ['#f00', '#f00', '#00f', '#ff0', '#0f0'],
+//     ['#0f0', '#f00', '#00f', '#ff0', '#0ff'],
+//   ),
+// );

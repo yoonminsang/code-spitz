@@ -1,15 +1,17 @@
 import { prop } from './util';
 
 const Panel = class {
-  static get(game, init, render) {
+  // TODO: selectBase가 왜 필요한지 모르겠다. 나중에 살펴보자
+  static get(game, selectBase, _render) {
     const p = new Panel();
-    return p.init(game, init(game), render), p;
+    p.init(game, selectBase(game), _render);
+    return p;
   }
-  init(game, base, r) {
-    prop(this, { base, game, r });
+  init(game, base, _render) {
+    prop(this, { game, base, _render });
   }
   render(v) {
-    this.r(this.game, v);
+    this._render(this.game, v);
   }
 };
 
@@ -21,9 +23,9 @@ const Panel = class {
 }
 Panel.get(
   game,
-  (game) => sel('#stageIntro'),
+  (game) => document.querySelector('#stageIntro'),
   (game, v) => {
-    sel('#stageIntro .stage').innerHTML = v;
+    document.querySelector('#stageIntro .stage').innerHTML = v;
     setTimeout(() => game.setState(Game.play), 500);
   },
 );
