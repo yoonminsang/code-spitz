@@ -85,6 +85,7 @@
       <div class="next" style="position: absolute; top: 10%; left: 10%; width: 100px; height: 100px; color: #000"></div>
     </div>
     <script>
+      //(_=>{
       const Subject = class {
         set listener(listener) {
           this._listener = listener;
@@ -277,9 +278,10 @@
             base.render(v);
           }
           _clearLine(data) {}
-          _move(data, block, position, x, y, test = {}) {
+          _move(data, block, position, x, y) {
             const v = block.block,
-              x = (position.x += x);
+              test = {};
+            x = position.x += x;
             y = position.y += y;
             v.forEach((v, i) => v.forEach((v, j) => data.cell(i + y, j + x, v, test)));
             if (test.isIntersacted) return;
@@ -362,7 +364,10 @@
         },
         null,
         Game.stageIntro,
-        (game) => sel('#stageIntro'),
+        (game) => {
+          console.log('stageintro', sel('#stageIntro'));
+          return sel('#stageIntro');
+        },
         (game, v) => {
           sel('#stageIntro .stage').innerHTML = v;
           setTimeout((_) => game.setState(Game.play), 500);
@@ -409,16 +414,16 @@
         null,
       ).setState(Game.title);
       /*
-const t = new TableRenderer(5, 5,'#000', 'width:100px;height:100px;border:0px;border-spacing:0;border-collapse:collapse');
-document.body.appendChild(t.base);
-t.render(new Data(5,5).all(
-	['#0f0','#f00','#00f','#ff0', '#0ff'],
-	['#00f','#f00','#ff0', '#0ff','#0f0'],
-	['#f00','#ff0', '#0ff','#0f0','#00f'],
-	['#ff0', '#0ff','#0f0','#f00','#00f'],
-	['#f00','#0f0','#ff0', '#0ff','#00f']
-));
-*/
+      const t = new TableRenderer(5, 5,'#000', 'width:100px;height:100px;border:0px;border-spacing:0;border-collapse:collapse');
+      document.body.appendChild(t.base);
+      t.render(new Data(5,5).all(
+      	['#0f0','#f00','#00f','#ff0', '#0ff'],
+      	['#00f','#f00','#ff0', '#0ff','#0f0'],
+      	['#f00','#ff0', '#0ff','#0f0','#00f'],
+      	['#ff0', '#0ff','#0f0','#f00','#00f'],
+      	['#f00','#0f0','#ff0', '#0ff','#00f']
+      ));
+      */
       //})();
     </script>
   </body>

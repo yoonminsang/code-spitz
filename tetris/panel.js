@@ -1,7 +1,6 @@
 import { prop } from './util';
 
 export const Panel = class {
-  // TODO: selectBase가 왜 필요한지 모르겠다. 나중에 살펴보자
   static get(game, selectBase, _render) {
     const p = new Panel();
     p.init(game, selectBase(game), _render);
@@ -11,7 +10,7 @@ export const Panel = class {
     prop(this, { game, base, _render });
   }
   render(v) {
-    this._render(this.game, v);
+    this._render?.(this.game, v);
   }
 };
 

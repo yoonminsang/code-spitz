@@ -2,8 +2,8 @@ import { Data } from '../Data';
 import { prop } from '../utils';
 
 export const Renderer = class {
-  constructor(col, row) {
-    prop(this, { col, row });
+  constructor(row, col) {
+    prop(this, { row, col });
   }
   clear() {
     throw 'override';

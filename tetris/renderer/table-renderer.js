@@ -2,9 +2,10 @@ import { createElement, setBackgroundColor } from '../utils';
 import { Renderer } from './renderer';
 
 export const TableRenderer = class extends Renderer {
-  constructor(base, backgroundColor, col, row) {
-    super(col, row);
+  constructor(row, col, backgroundColor) {
+    super(row, col);
     this.backgroundColor = backgroundColor;
+    this.base = createElement('table');
     while (row--) {
       const tr = base.appendChild(createElement('tr'));
       const curr = [];
