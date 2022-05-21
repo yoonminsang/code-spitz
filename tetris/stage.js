@@ -23,9 +23,9 @@ export const Stage = class {
       this.listener();
     }
   }
-  score(line) {
-    return parseInt(this.stage * 5 * 2 ** line);
-  }
+  // score(line) {
+  //   return parseInt(this.stage * 5 * 2 ** line);
+  // }
   [Symbol.toPrimitive]() {
     return this.stage;
   }

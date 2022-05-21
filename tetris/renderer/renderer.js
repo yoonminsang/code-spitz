@@ -1,4 +1,4 @@
-import { Data } from '../Data';
+import { Data } from '../data';
 import { prop } from '../utils';
 
 export const Renderer = class {

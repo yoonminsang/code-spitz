@@ -10,10 +10,9 @@ const Game = class {
   constructor(base, row, col, ...v) {
     const stage = new Stage(10, 1, 10);
     prop(this, { base, row, col, state: {}, curr: 'title', score: new Score(stage), stage });
-    let i = 0;
-    while (i < v.length) {
-      this.state[v[i].game] = Panel.get(this, v[i].selectBase, v[i].render);
-    }
+    v.forEach(({ game, selectBase, render }) => {
+      this.state[game] = Panel.get(this, selectBase, render);
+    });
   }
   // ex) state : Game.stageIntro
   setState(state) {
@@ -39,23 +38,23 @@ const Game = class {
     } = this;
     pannelBase.render(v);
   }
-  [s.title]() {
+  [TState.title]() {
     this.stage.clear();
     this.score.clear();
   }
-  [s.stageIntro]() {
+  [TState.stageIntro]() {
     this._render(this.stage);
   }
-  [s.play]() {
+  [TState.play]() {
     const data = new Data(this.row, this.col);
     // TODO ....
     this._render(data); // update
     this._render(Block.block()); // next
   }
-  [s.stageClear]() {}
-  [s.dead]() {}
-  [s.clear]() {}
-  [s.ranking]() {}
+  [TState.stageClear]() {}
+  [TState.dead]() {}
+  [TState.clear]() {}
+  [TState.ranking]() {}
 };
 Object.entries(TState).forEach(([str, symbol]) => (Game[str] = symbol));
 Object.freeze(Game);
