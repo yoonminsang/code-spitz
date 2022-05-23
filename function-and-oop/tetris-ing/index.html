@@ -1,3 +1,4 @@
+<!-- 5회차 강의에서 강사님이 만든 테트리스(미완성) -->
 <!DOCTYPE html>
 <html>
   <head>
@@ -85,7 +86,6 @@
       <div class="next" style="position: absolute; top: 10%; left: 10%; width: 100px; height: 100px; color: #000"></div>
     </div>
     <script>
-      //(_=>{
       const Subject = class {
         set listener(listener) {
           this._listener = listener;
@@ -413,18 +413,6 @@
         (p) => {},
         null,
       ).setState(Game.title);
-      /*
-      const t = new TableRenderer(5, 5,'#000', 'width:100px;height:100px;border:0px;border-spacing:0;border-collapse:collapse');
-      document.body.appendChild(t.base);
-      t.render(new Data(5,5).all(
-      	['#0f0','#f00','#00f','#ff0', '#0ff'],
-      	['#00f','#f00','#ff0', '#0ff','#0f0'],
-      	['#f00','#ff0', '#0ff','#0f0','#00f'],
-      	['#ff0', '#0ff','#0f0','#f00','#00f'],
-      	['#f00','#0f0','#ff0', '#0ff','#00f']
-      ));
-      */
-      //})();
     </script>
   </body>
 </html>
