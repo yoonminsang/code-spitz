@@ -1,4 +1,4 @@
-import { prop } from './utils';
+import { prop } from './utils/index.js';
 
 export const Score = class {
   constructor(stage, listener) {

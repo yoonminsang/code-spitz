@@ -1,4 +1,4 @@
-import { prop } from './util';
+import { prop } from './utils/index.js';
 
 export const Panel = class {
   static get(game, selectBase, _render) {

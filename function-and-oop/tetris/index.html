@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <section id="stage"></section>
+
+    <nav id="controller">
+      <button class="up"></button>
+      <button class="down"></button>
+      <button class="left"></button>
+      <button class="right"></button>
+      <button class="space"></button>
+    </nav>
+
+    <secionn id="title" style="display: none">
+      <h1>TETRIS</h1>
+      <button class="start">START</button>
+    </secionn>
+
+    <secionn id="stageIntro" style="display: none">
+      STAGE
+      <section class="stage"></section>
+    </secionn>
+
+    <secionn id="game" style="display: none">
+      <section class="next"></section>
+      <section class="play"></section>
+      <section class="stage">
+        STAGE
+        <section class="stage"></section>
+      </section>
+      <section class="score">
+        <div>SCORE</div>
+        <div>Current: <span class="curr"></span></div>
+        <div>Total: <span class="total"></span></div>
+      </section>
+    </secionn>
+
+    <secionn id="stageEnd" style="display: none">
+      <div>Stage: <span class="stage"></span></div>
+      <div>Current: <span class="curr"></span></div>
+      <div>Total: <span class="total"></span></div>
+      <button class="next">NEXT</button>
+    </secionn>
+
+    <secionn id="clear" style="display: none">
+      Thank you!
+      <button class="rank">Rank</button>
+      <button class="title">Title</button>
+    </secionn>
+
+    <secionn id="dead" style="display: none">
+      You are dead.
+      <button class="rank">Rank</button>
+      <button class="title">Title</button></secionn
+    >
+
+    <ul id="ranking" style="display: none"></ul>
+
+    <script src="./game.js" type="module"></script>
+  </body>
+</html>

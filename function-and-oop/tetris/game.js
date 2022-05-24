@@ -1,8 +1,8 @@
-import { Panel } from './panel';
-import { Score } from './score';
-import { Stage } from './stage';
-import { Data } from './data';
-import { prop, sel } from './utils';
+import { Panel } from './panel.js';
+import { Score } from './score.js';
+import { Stage } from './stage.js';
+import { Data } from './data.js';
+import { prop, sel } from './utils/index.js';
 
 const TState = {};
 'title,stageIntro,play,dead,stageClear,clear,ranking'.split(',').forEach((v) => (TState[v] = Symbol()));

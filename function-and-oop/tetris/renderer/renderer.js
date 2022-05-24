@@ -1,5 +1,5 @@
-import { Data } from '../data';
-import { prop } from '../utils';
+import { Data } from '../data.js';
+import { prop } from '../utils/index.js';
 
 export const Renderer = class {
   constructor(row, col) {

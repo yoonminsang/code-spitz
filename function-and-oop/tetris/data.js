@@ -1,4 +1,4 @@
-import { prop } from './util';
+import { prop } from './utils/index.js';
 
 export const Data = class extends Array {
   constructor(row, col) {

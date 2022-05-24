@@ -1,4 +1,4 @@
-import { prop } from './utils';
+import { prop } from './utils/index.js';
 
 export const Block = (() => {
   const makeBlock = (color, block) =>

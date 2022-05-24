@@ -1,5 +1,5 @@
-import { createElement, setBackgroundColor } from '../utils';
-import { Renderer } from './renderer';
+import { createElement, setBackgroundColor } from '../utils/index.js';
+import { Renderer } from './renderer.js';
 
 export const TableRenderer = class extends Renderer {
   constructor(row, col, backgroundColor) {
