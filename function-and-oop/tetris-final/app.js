@@ -1,3 +1,5 @@
+import { sel } from '../tetris/utils';
+
 const APP = ((SET) => {
   'use strict';
 
@@ -97,11 +99,58 @@ const APP = ((SET) => {
     [HOOK(Renderer, 'render')]() {}
     [OVERRIDE(Renderer, 'clear')]() {}
   };
+  // 클래스의 코드로 메소드를 안쓸까?? 이게 중요함.
+  // 결국 전략객체
+  const Panel = class {
+    constructor(game, _init, _render) {
+      PROP(this, game, _init, _render);
+    }
+    init(...arg) {
+      return (this.base = this._init(this.game, ...arg));
+    }
+    render(...arg) {
+      this._render(this.base, this.game, ...arg);
+    }
+  };
   const Game = class {
-    // TODO
-    // 56.18
-    // https://www.youtube.com/watch?v=ik7HZrEqfEA&list=PLBA53uNlbf-vuKTARH6Ka7a_Jp0OVT_AY&index=2&ab_channel=HikaMaeng
+    constructor(basePanel, row, col) {}
+    addState(state, { init, render }, f) {
+      this.state[state] = f;
+      this.panel[panel] = new Panel(this, init, render);
+    }
+  };
+  return {
+    init() {
+      const game = new Game(10, 20, {
+        init() {
+          return sel('#stage');
+        },
+        render(base, game, panel, { base: el = panel.init() }) {
+          base.innerHTML = '';
+          const { base: el = panel.init() } = panel;
+          base.appendChild(el);
+        },
+      });
+      // 전략패턴, 상태패턴
+      game.addState(
+        Gametitle,
+        {
+          init(game, ...arg) {
+            sel('#title').style.display = 'block';
+            sel('#title.start').onclick = () => game.setState(Game.stageIntro);
+            return sel('#title');
+          },
+          render: null,
+        },
+        (_, { stage, score }) => {
+          stage.clear();
+          score.clear();
+        },
+      );
+    },
   };
 })(SET);
 
 APP.init();
+
+// 1. 11. 11
