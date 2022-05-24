@@ -1,4 +1,4 @@
-import { createElement, HOOK, setBackgroundColor } from '../utils/index.js';
+import { createElement, HOOK, OVERRIDE, setBackgroundColor } from '../utils/index.js';
 import { Renderer } from './renderer.js';
 
 export const TableRenderer = class extends Renderer {

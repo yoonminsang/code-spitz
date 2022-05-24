@@ -9,6 +9,6 @@ export const TemplateMethodPattern = class {
     this.listener?.();
   }
   clear() {
-    TMPL(this, 'clear')();
+    TMPL(this, 'clear');
   }
 };

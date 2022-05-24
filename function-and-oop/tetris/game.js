@@ -2,21 +2,22 @@ import { Panel } from './panel.js';
 import { Score } from './score.js';
 import { Stage } from './stage.js';
 import { Data } from './data.js';
-import { prop, sel } from './utils/index.js';
+import { ERR, prop, sel } from './utils/index.js';
+import { TableRenderer } from './renderer/table-renderer.js';
 
 const TState = {};
-'title,stageIntro,play,dead,stageClear,clear,ranking'.split(',').forEach((v) => (TState[v] = Symbol()));
+'title,stageIntro,play,stageClear,clear,dead,ranking'.split(',').forEach((v) => (TState[v] = Symbol()));
 const Game = class {
   constructor(base, row, col, ...v) {
     const stage = new Stage(10, 1, 10);
-    prop(this, { base, row, col, state: {}, curr: 'title', score: new Score(stage), stage });
+    prop(this, { base, row, col, state: {}, curr: '', score: new Score(stage), stage });
     v.forEach(({ game, selectBase, render }) => {
       this.state[game] = Panel.get(this, selectBase, render);
     });
   }
   // ex) state : Game.stageIntro
   setState(state) {
-    if (!Object.values(TState).includes(state)) throw 'invalid';
+    if (!Object.values(TState).includes(state)) ERR('invalid');
     this.curr = state;
     // constructor의 while문에서 Panel.get을 했기 때문에 Panel의 base값
     const {
@@ -26,6 +27,7 @@ const Game = class {
     } = this;
     // 아래 세줄은 base객체에 clear 메서드 넣어서 초기화시켜야함.
     // 지금은 이해를 돕기위해 도메인, 네이티브 분리를 안함.
+    console.log(this.base, pannelBase, this.state);
     this.base.innerHTML = '';
     this.base.appendChild(pannelBase);
     pannelBase.style.display = 'block';
@@ -39,10 +41,12 @@ const Game = class {
     pannelBase.render(v);
   }
   [TState.title]() {
+    console.log('title');
     this.stage.clear();
     this.score.clear();
   }
   [TState.stageIntro]() {
+    console.log('stage intro');
     this._render(this.stage);
   }
   [TState.play]() {
@@ -52,8 +56,8 @@ const Game = class {
     this._render(Block.block()); // next
   }
   [TState.stageClear]() {}
-  [TState.dead]() {}
   [TState.clear]() {}
+  [TState.dead]() {}
   [TState.ranking]() {}
 };
 Object.entries(TState).forEach(([str, symbol]) => (Game[str] = symbol));
@@ -66,7 +70,8 @@ const game = new Game(
   {
     game: Game.title,
     selectBase: (game) => {
-      sel('#title .btn').onclick = () => game.setState(Game.stageIntro);
+      sel('#title .start').onclick = () => game.setState(Game.stageIntro);
+      return sel('#title');
     },
     render: null,
   },
@@ -75,7 +80,7 @@ const game = new Game(
     selectBase: (game) => sel('#stageIntro'),
     render: (game, v) => {
       sel('#stageIntro .stage').innerHTML = v;
-      setTimeout((_) => game.setState(Game.play), 500);
+      setTimeout(() => game.setState(Game.play), 500);
     },
   },
   {
@@ -107,3 +112,5 @@ const game = new Game(
     },
   },
 );
+
+game.setState(Game.title);
