@@ -1,4 +1,4 @@
-import { createElement, setBackgroundColor } from '../utils/index.js';
+import { createElement, HOOK, setBackgroundColor } from '../utils/index.js';
 import { Renderer } from './renderer.js';
 
 export const TableRenderer = class extends Renderer {
@@ -6,8 +6,9 @@ export const TableRenderer = class extends Renderer {
     super(row, col);
     this.backgroundColor = backgroundColor;
     this.base = createElement('table');
+    this.blocks = [];
     while (row--) {
-      const tr = base.appendChild(createElement('tr'));
+      const tr = this.base.appendChild(createElement('tr'));
       const curr = [];
       this.blocks.push(curr);
       let i = col;
@@ -15,11 +16,11 @@ export const TableRenderer = class extends Renderer {
     }
     this.clear();
   }
-  clear() {
+  [OVERRIDE(Renderer, 'clear')]() {
     this.blocks.forEach((block) => block.forEach((s) => setBackgroundColor(s, this.backgroundColor)));
   }
-  _render(v) {
-    this.blocks.forEach((block, row) => block.forEach((s, col) => setBackgroundColor(s, v[row][col])));
+  [HOOK(Renderer, 'render')](data) {
+    this.blocks.forEach((block, row) => block.forEach((s, col) => setBackgroundColor(s, data[row][col])));
   }
 };
 

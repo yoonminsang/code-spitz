@@ -1,10 +1,12 @@
-import { prop } from './utils/index.js';
+import { TemplateMethodPattern } from './template-method-pattern.js';
+import { HOOK, prop } from './utils/index.js';
 
-export const Stage = class {
+export const Stage = class extends TemplateMethodPattern {
   constructor(last, minSpeed, maxSpeed, listener) {
+    super(listener);
     prop(this, { last, minSpeed, maxSpeed, listener });
   }
-  clear() {
+  [HOOK(TemplateMethodPattern, 'clear')]() {
     this.stage = 0;
     this.next();
   }
@@ -20,7 +22,7 @@ export const Stage = class {
     if (this.stage++ < this.last) {
       this._speed();
       this._count();
-      this.listener();
+      this.notify();
     }
   }
   // score(line) {
