@@ -9,10 +9,14 @@ export const Block = (() => {
     };
   const Block = class {
     static block() {
-      return new this.blocks[parseInt(Math.random() * this.blocks.length)]();
+      // return new this.blocks[parseInt(Math.random() * this.blocks.length)]();
+      // 테스트용 코드
+      return new this.blocks[0]();
     }
     constructor(color, blocks) {
-      prop(this, { color, blocks, rotate: parseInt(Math.random() * blocks.length), count: blocks.length - 1 });
+      // prop(this, { color, blocks, rotate: parseInt(Math.random() * blocks.length), count: blocks.length - 1 });
+      // 테스트용 코드
+      prop(this, { color, blocks, rotate: parseInt(0), count: blocks.length - 1 });
     }
     left() {
       if (--this.rotate < 0) this.rotate = this.count;

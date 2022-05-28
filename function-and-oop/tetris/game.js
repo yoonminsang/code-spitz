@@ -6,6 +6,9 @@ import { ERR, prop, sel } from './utils/index.js';
 import { TableRenderer } from './renderer/table-renderer.js';
 import { Block } from './block.js';
 
+const LEFT = 37;
+const RIGHT = 39;
+
 const TState = {};
 'title,stageIntro,play,stageClear,clear,dead,ranking'.split(',').forEach((v) => (TState[v] = Symbol()));
 const Game = class {
@@ -18,7 +21,6 @@ const Game = class {
   }
   // ex) state : Game.stageIntro
   setState(state) {
-    console.log('setstate');
     if (!Object.values(TState).includes(state)) ERR('invalid');
     this.curr = state;
     // constructor의 while문에서 Panel.get을 했기 때문에 Panel의 base값
@@ -41,18 +43,6 @@ const Game = class {
     } = this;
     pannelBase.render(v);
   }
-  _clearLine(data) {}
-  _move(data, block, position, x, y) {
-    const { blocks, color } = block;
-    const test = {};
-    // console.log('_move', data, block, position, x, y);
-    x = position.x += x;
-    y = position.y += y;
-    blocks.forEach((blocksRow, i) => blocksRow.forEach((v, j) => data.makeCell(i + y, j + x, v ? color : '0', test)));
-    if (test.isIntersacted) return;
-    blocks.forEach((blocksRow, i) => blocksRow.forEach((v, j) => data.makeCell(i + y, j + x, v ? color : '0')));
-    this._render(data);
-  }
   [TState.title]() {
     this.stage.clear();
     this.score.clear();
@@ -61,66 +51,93 @@ const Game = class {
     this._render(this.stage);
   }
   [TState.play]() {
+    const _clearLine = (data) => {
+      let line;
+      data.forEach((row) => {
+        const isClear = row.filter((color) => color === '0').length === 0;
+        if (isClear) {
+          line++;
+          data[row] = Array(this.col).fill('0');
+        }
+      });
+      return line;
+    };
+
+    const _move = (data, { color, block }, position, x, y, test = {}) => {
+      console.log('move', data, color, block, position, x, y);
+      const tempX = position.x + x;
+      const tempY = position.y + y;
+      block.forEach((blocksRow, i) =>
+        blocksRow.forEach((v, j) => data.makeCell(i + tempY, j + tempX, v ? color : '0', test)),
+      );
+      if (test.isIntersacted) return;
+      block.forEach((blocksRow, i) =>
+        blocksRow.forEach((v, j) => data.makeCell(i + tempY, j + tempX, v ? color : '0')),
+      );
+      position.x += x;
+      position.y += y;
+      this._render(data);
+    };
+
+    const next = () => {
+      currBlock = Block.block();
+      nextBlock = Block.block();
+      position.x = parseInt((col - currBlock.block[0].length) * 0.5);
+      position.y = -1;
+      this._render(nextBlock);
+    };
+
     const { row, col } = this;
     const position = { x: 0, y: 0 };
     const data = new Data(row, col);
     let {
-      stage: { count },
+      stage: { count, speed },
     } = this;
-    let curr;
+    let currBlock;
     let nextBlock;
 
-    // const keyInLimit = 100;
-    // let lastKeyIn = 0;
-    // this.base.onkeydown = (e) => {
-    //   const now = performance.now();
-    //   let x, y;
-    //   if (now - lastKeyIn > keyInLimit) {
-    //     lastKeyIn = now;
-    //     switch (e.keyCode) {
-    //       case 'left':
-    //         x = -1;
-    //         break;
-    //       case 'right':
-    //         x = +1;
-    //         break;
-    //     }
-    //     // TODO: curr 삭제
-    //     (x = 0), (y = 0), (curr = Block.block());
-    //     this._move(data, curr, position, x, y);
-    //   }
-    // };
-
-    const next = () => {
-      curr = Block.block();
-      nextBlock = Block.block();
-      position.x = parseInt((col - curr.block[0]) * 0.5);
-      position.y = -curr.block.length;
-      this._render(nextBlock);
+    const keyInLimit = 100;
+    let lastKeyIn = 0;
+    this.base.onkeydown = (e) => {
+      const now = performance.now();
+      let x;
+      const y = 0;
+      if (now - lastKeyIn > keyInLimit) {
+        lastKeyIn = now;
+        switch (e.keyCode) {
+          case LEFT:
+            x = -1;
+            break;
+          case RIGHT:
+            x = +1;
+            break;
+        }
+        _move(data, currBlock, position, x, y);
+      }
     };
 
     next();
 
-    // const id = setInterval((_) => {
-    //   const test = {};
-    //   this._move(data, curr, position, 0, 1, test);
-    // if (test.isIntersacted) {
-    //   const line = this._clearLine(data);
-    //   if (line) {
-    //     count -= line;
-    //     if (count < 0) count = 0;
-    //     this.score.add(line, this.stage.stage);
-    //   }
-    //   if (!count) {
-    //     clearInterval(id);
-    //     return this.setState(Game.stageClear);
-    //   }
-    //   if (data[0].some((v) => v)) {
-    //     clearInterval(id);
-    //     return this.setState(Game.dead);
-    //   } else next();
-    // }
-    // }, this.stage.speed);
+    const id = setInterval(() => {
+      const test = {};
+      _move(data, currBlock, position, 0, 1, test);
+      if (test.isIntersacted) {
+        const line = _clearLine(data);
+        if (line) {
+          count -= line;
+          if (count < 0) count = 0;
+          this.score.add(line);
+        }
+        if (!count) {
+          clearInterval(id);
+          return this.setState(Game.stageClear);
+        }
+        if (data[0].some((v) => v !== '0')) {
+          clearInterval(id);
+          return this.setState(Game.dead);
+        } else next();
+      }
+    }, speed);
   }
   [TState.stageClear]() {}
   [TState.clear]() {}
@@ -167,19 +184,40 @@ const game = new Game(
           sel('#play').renderer.render(v);
           break;
         case v instanceof Block:
-          const { blocks, color, rotate } = v;
-          const row = blocks[rotate].length;
-          const col = blocks[rotate].reduce((acc, cur) => (cur.length > acc ? cur.length : acc), 0);
+          const { color, block } = v;
+          const row = block.length;
+          const col = block.reduce((acc, cur) => (cur.length > acc ? cur.length : acc), 0);
           const tableRenderer = new TableRenderer(row, col, '#fff');
           sel('#play .next').innerHTML = '';
           sel('#play .next').appendChild(tableRenderer.base);
-          tableRenderer.render(
-            new Data(row, col).all(...blocks[rotate].map((row) => row.map((v) => (v ? color : '0')))),
-          );
+          tableRenderer.render(new Data(row, col).all(...block.map((row) => row.map((v) => (v ? color : '0')))));
           break;
       }
     },
   },
+  {
+    game: Game.stageClear,
+    selectBase: (game) => {
+      return sel('#stage-clear');
+    },
+    render: null,
+  },
+  {
+    game: Game.clear,
+    selectBase: (game) => {
+      return sel('#clear');
+    },
+    render: null,
+  },
+  {
+    game: Game.dead,
+    selectBase: (game) => {
+      sel('#dead .title').onclick = () => game.setState(Game.title);
+      return sel('#dead');
+    },
+    render: null,
+  },
 );
 
 game.setState(Game.title);
+// game.setState(Game.play);
