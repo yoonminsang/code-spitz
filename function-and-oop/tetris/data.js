@@ -6,16 +6,21 @@ export const Data = class extends Array {
     prop(this, { row, col });
   }
   makeCell(row, col, color, test) {
-    if (row > this.row || col > this.col || row < 0 || col < 0 || color === '0') return this;
+    if (row > this.row || col > this.col || row < 0 || col < 0 || !color) return this;
     const thisRow = this[row] || (this[row] = []);
-    if (color && thisRow[col]) test.isIntersacted = true;
-    thisRow[col] = color;
+    if (test) {
+      if (thisRow[col]) {
+        test.isIntersacted = true;
+      }
+    } else {
+      thisRow[col] = color;
+    }
     return this;
   }
-  makeRow(row, ...color) {
-    return color.forEach((v, i) => this.makeCell(row, i, v)), this;
+  makeRow(row, ...col) {
+    return col.forEach((color, i) => this.makeCell(row, i, color)), this;
   }
   all(...rows) {
-    return rows.forEach((v, i) => this.makeRow(i, ...v)), this;
+    return rows.forEach((col, i) => this.makeRow(i, ...col)), this;
   }
 };

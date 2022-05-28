@@ -43,14 +43,14 @@ const Game = class {
   }
   _clearLine(data) {}
   _move(data, block, position, x, y) {
-    const v = block.block,
-      test = {};
-    console.log('_move', data, block, position, x, y);
+    const { blocks, color } = block;
+    const test = {};
+    // console.log('_move', data, block, position, x, y);
     x = position.x += x;
     y = position.y += y;
-    v.forEach((v, i) => v.forEach((v, j) => data.makeCell(i + y, j + x, v, test)));
+    blocks.forEach((blocksRow, i) => blocksRow.forEach((v, j) => data.makeCell(i + y, j + x, v ? color : '0', test)));
     if (test.isIntersacted) return;
-    v.forEach((v, i) => v.forEach((v, j) => data.makeCell(i + y, j + x, v)));
+    blocks.forEach((blocksRow, i) => blocksRow.forEach((v, j) => data.makeCell(i + y, j + x, v ? color : '0')));
     this._render(data);
   }
   [TState.title]() {
@@ -61,11 +61,6 @@ const Game = class {
     this._render(this.stage);
   }
   [TState.play]() {
-    // const data = new Data(this.row, this.col);
-    // // TODO ....
-    // this._render(data); // update
-    // this._render(Block.block()); // next
-
     const { row, col } = this;
     const position = { x: 0, y: 0 };
     const data = new Data(row, col);
@@ -75,24 +70,26 @@ const Game = class {
     let curr;
     let nextBlock;
 
-    const keyInLimit = 100;
-    let lastKeyIn = 0;
-    this.base.onkeydown = (e) => {
-      const now = performance.now();
-      let x, y;
-      if (now - lastKeyIn > keyInLimit) {
-        lastKeyIn = now;
-        switch (e.keyCode) {
-          case 'left':
-            x = -1;
-            break;
-          case 'right':
-            x = +1;
-            break;
-        }
-        this._move(data, curr, position, x, y);
-      }
-    };
+    // const keyInLimit = 100;
+    // let lastKeyIn = 0;
+    // this.base.onkeydown = (e) => {
+    //   const now = performance.now();
+    //   let x, y;
+    //   if (now - lastKeyIn > keyInLimit) {
+    //     lastKeyIn = now;
+    //     switch (e.keyCode) {
+    //       case 'left':
+    //         x = -1;
+    //         break;
+    //       case 'right':
+    //         x = +1;
+    //         break;
+    //     }
+    //     // TODO: curr 삭제
+    //     (x = 0), (y = 0), (curr = Block.block());
+    //     this._move(data, curr, position, x, y);
+    //   }
+    // };
 
     const next = () => {
       curr = Block.block();
@@ -103,26 +100,27 @@ const Game = class {
     };
 
     next();
-    const id = setInterval((_) => {
-      const test = {};
-      this._move(data, curr, position, 0, 1, test);
-      if (test.isIntersacted) {
-        const line = this._clearLine(data);
-        if (line) {
-          count -= line;
-          if (count < 0) count = 0;
-          this.score.add(line, this.stage.stage);
-        }
-        if (!count) {
-          clearInterval(id);
-          return this.setState(Game.stageClear);
-        }
-        if (data[0].some((v) => v)) {
-          clearInterval(id);
-          return this.setState(Game.dead);
-        } else next();
-      }
-    }, this.stage.speed);
+
+    // const id = setInterval((_) => {
+    //   const test = {};
+    //   this._move(data, curr, position, 0, 1, test);
+    // if (test.isIntersacted) {
+    //   const line = this._clearLine(data);
+    //   if (line) {
+    //     count -= line;
+    //     if (count < 0) count = 0;
+    //     this.score.add(line, this.stage.stage);
+    //   }
+    //   if (!count) {
+    //     clearInterval(id);
+    //     return this.setState(Game.stageClear);
+    //   }
+    //   if (data[0].some((v) => v)) {
+    //     clearInterval(id);
+    //     return this.setState(Game.dead);
+    //   } else next();
+    // }
+    // }, this.stage.speed);
   }
   [TState.stageClear]() {}
   [TState.clear]() {}
@@ -155,30 +153,29 @@ const game = new Game(
   {
     game: Game.play,
     selectBase: (game) => {
-      const t = new TableRenderer(game.row, game.col, '#000');
-      sel('#play').appendChild(t.base);
-      sel('#play').renderer = t;
+      const tableRenderer = new TableRenderer(game.row, game.col, '#000');
+      sel('#play').appendChild(tableRenderer.base);
+      sel('#play').renderer = tableRenderer;
       return sel('#play');
     },
-    render: (v) => {
-      console.log('play render', v);
+    render: (game, v) => {
+      sel('#play .stage .stage').innerHTML = game.stage;
+      sel('#play .score .curr').innerHTML = game.score.curr;
+      sel('#play .score .total').innerHTML = game.score.total;
       switch (true) {
         case v instanceof Data:
-          console.log('play render data', v);
           sel('#play').renderer.render(v);
           break;
         case v instanceof Block:
-          console.log('play render block', v);
-          v = v.block;
-          const t = new TableRenderer(
-            v.reduce((acc, cur) => (cur.length > acc ? cur.length : acc), 0),
-            v.length,
-            'rgba(0,0,0,0)',
-          );
-          t.base.style.cssText = 'width:100px;height:100px;border:0px;border-spacing:0;border-collapse:collapse';
+          const { blocks, color, rotate } = v;
+          const row = blocks[rotate].length;
+          const col = blocks[rotate].reduce((acc, cur) => (cur.length > acc ? cur.length : acc), 0);
+          const tableRenderer = new TableRenderer(row, col, '#fff');
           sel('#play .next').innerHTML = '';
-          sel('#play .next').appendChild(t.base);
-          t.render(new Data(5, 5).all(...v.map((v) => (v == '0' ? '0' : v.color))));
+          sel('#play .next').appendChild(tableRenderer.base);
+          tableRenderer.render(
+            new Data(row, col).all(...blocks[rotate].map((row) => row.map((v) => (v ? color : '0')))),
+          );
           break;
       }
     },

@@ -20,7 +20,13 @@ export const TableRenderer = class extends Renderer {
     this.blocks.forEach((block) => block.forEach((s) => setBackgroundColor(s, this.backgroundColor)));
   }
   [HOOK(Renderer, 'render')](data) {
-    this.blocks.forEach((block, row) => block.forEach((s, col) => setBackgroundColor(s, data[row][col])));
+    this.blocks.forEach((blockCol, row) =>
+      blockCol.forEach((s, col) => {
+        if (data[row]?.[col] && data[row][col] !== '0') {
+          setBackgroundColor(s, data[row][col]);
+        }
+      }),
+    );
   }
 };
 

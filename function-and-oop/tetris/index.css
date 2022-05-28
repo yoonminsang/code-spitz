@@ -11,6 +11,30 @@
   gap: 10px;
 }
 
+#play {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+#play .next {
+  position: absolute;
+  left: 100px;
+  top: 50px;
+}
+
+#play .stage,
+#play .score {
+  width: 300px;
+}
+
+#play table {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
 #play table td {
   width: 30px;
   height: 30px;

@@ -12,7 +12,7 @@ export const Block = (() => {
       return new this.blocks[parseInt(Math.random() * this.blocks.length)]();
     }
     constructor(color, blocks) {
-      prop(this, { color, blocks, rotate: 0, count: blocks.length - 1 });
+      prop(this, { color, blocks, rotate: parseInt(Math.random() * blocks.length), count: blocks.length - 1 });
     }
     left() {
       if (--this.rotate < 0) this.rotate = this.count;
@@ -66,7 +66,7 @@ export const Block = (() => {
       blocks: [
         [
           [0, 1, 1],
-          [1, 1],
+          [1, 1, 0],
         ],
         [
           [1, 0],
