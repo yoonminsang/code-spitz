@@ -8,6 +8,7 @@ import { Block } from './block.js';
 
 const LEFT = 37;
 const RIGHT = 39;
+const SPACEBAR = 32;
 
 const TState = {};
 'title,stageIntro,play,stageClear,clear,dead,ranking'.split(',').forEach((v) => (TState[v] = Symbol()));
@@ -52,31 +53,41 @@ const Game = class {
   }
   [TState.play]() {
     const _clearLine = (data) => {
-      let line;
-      data.forEach((row) => {
-        const isClear = row.filter((color) => color === '0').length === 0;
+      let line = 0;
+      data.forEach((row, i) => {
+        const isClear = row.filter((color) => color?.startsWith('#')).length === this.col;
         if (isClear) {
           line++;
-          data[row] = Array(this.col).fill('0');
+          data[i] = [];
         }
       });
+      console.log(data);
       return line;
     };
 
-    const _move = (data, { color, block }, position, x, y, test = {}) => {
-      console.log('move', data, color, block, position, x, y);
+    const _move = (data, currBlockData, { color, block }, position, x, y, test = {}) => {
+      // console.log('move', data, color, block, position, x, y);
+      const { row, col } = data;
       const tempX = position.x + x;
       const tempY = position.y + y;
+
       block.forEach((blocksRow, i) =>
-        blocksRow.forEach((v, j) => data.makeCell(i + tempY, j + tempX, v ? color : '0', test)),
+        blocksRow.forEach((v, j) => {
+          data.makeCell(i + tempY, j + tempX, v ? color : '0', test);
+        }),
       );
       if (test.isIntersacted) return;
+      currBlockData = new Data(row, col);
       block.forEach((blocksRow, i) =>
-        blocksRow.forEach((v, j) => data.makeCell(i + tempY, j + tempX, v ? color : '0')),
+        blocksRow.forEach((v, j) => currBlockData.makeCell(i + tempY, j + tempX, v ? color : '0')),
       );
       position.x += x;
       position.y += y;
-      this._render(data);
+
+      const renderArr = data.slice().map((row) => row.map((color) => color));
+      currBlockData.forEach((row, i) => row.forEach((color, j) => (renderArr[i][j] = color)));
+      const renderData = new Data(row, col).all(...renderArr);
+      this._render(renderData);
     };
 
     const next = () => {
@@ -89,7 +100,8 @@ const Game = class {
 
     const { row, col } = this;
     const position = { x: 0, y: 0 };
-    const data = new Data(row, col);
+    let data = new Data(row, col);
+    const currBlockData = new Data(row, col);
     let {
       stage: { count, speed },
     } = this;
@@ -100,7 +112,7 @@ const Game = class {
     let lastKeyIn = 0;
     this.base.onkeydown = (e) => {
       const now = performance.now();
-      let x;
+      let x = 0;
       const y = 0;
       if (now - lastKeyIn > keyInLimit) {
         lastKeyIn = now;
@@ -111,8 +123,14 @@ const Game = class {
           case RIGHT:
             x = +1;
             break;
+          case SPACEBAR:
+            // TODO: validation
+            currBlock.right();
+            _move(data, currBlockData, currBlock, position, x, y);
+          default:
+            return;
         }
-        _move(data, currBlock, position, x, y);
+        _move(data, currBlockData, currBlock, position, x, y);
       }
     };
 
@@ -120,13 +138,20 @@ const Game = class {
 
     const id = setInterval(() => {
       const test = {};
-      _move(data, currBlock, position, 0, 1, test);
+      _move(data, currBlockData, currBlock, position, 0, 1, test);
       if (test.isIntersacted) {
+        if (currBlock) {
+          currBlock.block.forEach((blocksRow, i) =>
+            blocksRow.forEach((v, j) => data.makeCell(i + position.y, j + position.x, v ? currBlock.color : '0')),
+          );
+          this._render(data);
+        }
         const line = _clearLine(data);
         if (line) {
           count -= line;
           if (count < 0) count = 0;
           this.score.add(line);
+          this._render(data);
         }
         if (!count) {
           clearInterval(id);
@@ -135,7 +160,9 @@ const Game = class {
         if (data[0].some((v) => v !== '0')) {
           clearInterval(id);
           return this.setState(Game.dead);
-        } else next();
+        } else {
+          next();
+        }
       }
     }, speed);
   }
@@ -149,7 +176,7 @@ Object.freeze(Game);
 
 const game = new Game(
   sel('body'),
-  20,
+  10,
   10,
   {
     game: Game.title,

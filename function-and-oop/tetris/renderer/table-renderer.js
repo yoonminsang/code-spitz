@@ -24,6 +24,8 @@ export const TableRenderer = class extends Renderer {
       blockCol.forEach((s, col) => {
         if (data[row]?.[col] && data[row][col] !== '0') {
           setBackgroundColor(s, data[row][col]);
+        } else {
+          setBackgroundColor(s, this.backgroundColor);
         }
       }),
     );
@@ -37,11 +39,11 @@ export const TableRenderer = class extends Renderer {
 // `;
 // document.body.appendChild(t.base);
 // t.render(
-//   new Data(5, 5).all(
-//     ['#0f0', '#f00', '#00f', '#ff0', '#0ff'],
-//     ['#f00', '#f00', '#00f', '#ff0', '#0f0'],
-//     ['#0f0', '#f00', '#00f', '#ff0', '#0ff'],
-//     ['#f00', '#f00', '#00f', '#ff0', '#0f0'],
-//     ['#0f0', '#f00', '#00f', '#ff0', '#0ff'],
-//   ),
+// new Data(5, 5).all(
+//   ['#0f0', '#f00', '#00f', '#ff0', '#0ff'],
+//   ['#f00', '#f00', '#00f', '#ff0', '#0f0'],
+//   ['#0f0', '#f00', '#00f', '#ff0', '#0ff'],
+//   ['#f00', '#f00', '#00f', '#ff0', '#0f0'],
+//   ['#0f0', '#f00', '#00f', '#ff0', '#0ff'],
+// ),
 // );

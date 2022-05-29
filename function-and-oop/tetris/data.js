@@ -6,10 +6,12 @@ export const Data = class extends Array {
     prop(this, { row, col });
   }
   makeCell(row, col, color, test) {
-    if (row > this.row || col > this.col || row < 0 || col < 0 || !color) return this;
+    if (!color || color === '0') {
+      return this;
+    }
     const thisRow = this[row] || (this[row] = []);
     if (test) {
-      if (thisRow[col]) {
+      if (thisRow[col] || row < 0 || col < 0 || row >= this.row || col >= this.col) {
         test.isIntersacted = true;
       }
     } else {
