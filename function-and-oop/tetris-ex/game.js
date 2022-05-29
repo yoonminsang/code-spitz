@@ -65,18 +65,11 @@ const Game = class {
           }
         }
       });
-      // while(true){
-      // for (let i = data.length - 1; i >= 0; i--) {
-      //   console.log(data[i]);
-      // const isClear = data[i].filter((color) => color?.startsWith('#')).length === this.col;
-      // }
-      // }
-      console.log(line);
       return line;
     };
 
     const _move = (data, { color, block }, position, x, y, test = {}) => {
-      console.log('move', data);
+      console.log('move', data, x, y);
       const { row, col } = data;
       const tempX = position.x + x;
       const tempY = position.y + y;
@@ -152,10 +145,25 @@ const Game = class {
             checkRotate();
             if (checkRotate()) {
               currBlock.right();
-              _move(data, currBlock, position, x, y);
+              this._render(data);
             }
           case DOWN:
             y = +1;
+            break;
+          case SPACEBAR:
+            const test = {};
+            let tempY = 0;
+            while (!test.isIntersacted) {
+              tempY++;
+              currBlock.block.forEach((blocksRow, i) =>
+                blocksRow.forEach((v, j) => {
+                  console.log(test.isIntersacted);
+                  data.makeCell(i + position.y + tempY, j + position.x, v ? currBlock.color : '0', test);
+                }),
+              );
+            }
+            position.y = position.y + tempY - 1;
+            this._render(data);
             break;
           default:
             return;
@@ -166,16 +174,18 @@ const Game = class {
 
     next();
 
+    const addBlockInData = () => {
+      currBlock.block.forEach((blocksRow, i) =>
+        blocksRow.forEach((v, j) => data.makeCell(i + position.y, j + position.x, v ? currBlock.color : '0')),
+      );
+      this._render(data);
+    };
+
     const id = setInterval(() => {
       const test = {};
       _move(data, currBlock, position, 0, 1, test);
       if (test.isIntersacted) {
-        if (currBlock) {
-          currBlock.block.forEach((blocksRow, i) =>
-            blocksRow.forEach((v, j) => data.makeCell(i + position.y, j + position.x, v ? currBlock.color : '0')),
-          );
-          this._render(data);
-        }
+        if (currBlock) addBlockInData();
         const line = _clearLine(data);
         if (line) {
           count -= line;
