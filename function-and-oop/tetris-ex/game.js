@@ -69,7 +69,6 @@ const Game = class {
     };
 
     const _move = (data, { color, block }, position, x, y, test = {}) => {
-      console.log('move', data, x, y);
       const { row, col } = data;
       const tempX = position.x + x;
       const tempY = position.y + y;
@@ -157,7 +156,6 @@ const Game = class {
               tempY++;
               currBlock.block.forEach((blocksRow, i) =>
                 blocksRow.forEach((v, j) => {
-                  console.log(test.isIntersacted);
                   data.makeCell(i + position.y + tempY, j + position.x, v ? currBlock.color : '0', test);
                 }),
               );
