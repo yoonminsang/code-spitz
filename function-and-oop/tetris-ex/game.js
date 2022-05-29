@@ -7,7 +7,9 @@ import { TableRenderer } from './renderer/table-renderer.js';
 import { Block } from './block.js';
 
 const LEFT = 37;
+const UP = 38;
 const RIGHT = 39;
+const DOWN = 40;
 const SPACEBAR = 32;
 
 const TState = {};
@@ -58,15 +60,23 @@ const Game = class {
         const isClear = row.filter((color) => color?.startsWith('#')).length === this.col;
         if (isClear) {
           line++;
-          data[i] = [];
+          for (i; i > 0; i--) {
+            data[i] = data[i - 1];
+          }
         }
       });
-      console.log(data);
+      // while(true){
+      // for (let i = data.length - 1; i >= 0; i--) {
+      //   console.log(data[i]);
+      // const isClear = data[i].filter((color) => color?.startsWith('#')).length === this.col;
+      // }
+      // }
+      console.log(line);
       return line;
     };
 
-    const _move = (data, currBlockData, { color, block }, position, x, y, test = {}) => {
-      // console.log('move', data, color, block, position, x, y);
+    const _move = (data, { color, block }, position, x, y, test = {}) => {
+      console.log('move', data);
       const { row, col } = data;
       const tempX = position.x + x;
       const tempY = position.y + y;
@@ -77,7 +87,7 @@ const Game = class {
         }),
       );
       if (test.isIntersacted) return;
-      currBlockData = new Data(row, col);
+      const currBlockData = new Data(row, col);
       block.forEach((blocksRow, i) =>
         blocksRow.forEach((v, j) => currBlockData.makeCell(i + tempY, j + tempX, v ? color : '0')),
       );
@@ -91,17 +101,32 @@ const Game = class {
     };
 
     const next = () => {
-      currBlock = Block.block();
+      if (nextBlock) currBlock = nextBlock;
+      else currBlock = Block.block();
       nextBlock = Block.block();
       position.x = parseInt((col - currBlock.block[0].length) * 0.5);
       position.y = -1;
       this._render(nextBlock);
     };
 
+    const checkRotate = () => {
+      currBlock.right();
+      const test = {};
+      currBlock.block.forEach((blocksRow, i) =>
+        blocksRow.forEach((v, j) => {
+          data.makeCell(i + position.y, j + position.x, v ? currBlock.color : '0', test);
+        }),
+      );
+      if (test.isIntersacted) {
+        currBlock.left();
+        return false;
+      }
+      return true;
+    };
+
     const { row, col } = this;
     const position = { x: 0, y: 0 };
     let data = new Data(row, col);
-    const currBlockData = new Data(row, col);
     let {
       stage: { count, speed },
     } = this;
@@ -113,7 +138,7 @@ const Game = class {
     this.base.onkeydown = (e) => {
       const now = performance.now();
       let x = 0;
-      const y = 0;
+      let y = 0;
       if (now - lastKeyIn > keyInLimit) {
         lastKeyIn = now;
         switch (e.keyCode) {
@@ -123,14 +148,19 @@ const Game = class {
           case RIGHT:
             x = +1;
             break;
-          case SPACEBAR:
-            // TODO: validation
-            currBlock.right();
-            _move(data, currBlockData, currBlock, position, x, y);
+          case UP:
+            checkRotate();
+            if (checkRotate()) {
+              currBlock.right();
+              _move(data, currBlock, position, x, y);
+            }
+          case DOWN:
+            y = +1;
+            break;
           default:
             return;
         }
-        _move(data, currBlockData, currBlock, position, x, y);
+        _move(data, currBlock, position, x, y);
       }
     };
 
@@ -138,7 +168,7 @@ const Game = class {
 
     const id = setInterval(() => {
       const test = {};
-      _move(data, currBlockData, currBlock, position, 0, 1, test);
+      _move(data, currBlock, position, 0, 1, test);
       if (test.isIntersacted) {
         if (currBlock) {
           currBlock.block.forEach((blocksRow, i) =>
@@ -176,7 +206,7 @@ Object.freeze(Game);
 
 const game = new Game(
   sel('body'),
-  10,
+  20,
   10,
   {
     game: Game.title,
@@ -225,6 +255,10 @@ const game = new Game(
   {
     game: Game.stageClear,
     selectBase: (game) => {
+      sel('#stage-clear .next').onclick = () => {
+        game.stage.next();
+        game.setState(Game.stageIntro);
+      };
       return sel('#stage-clear');
     },
     render: null,
@@ -232,6 +266,7 @@ const game = new Game(
   {
     game: Game.clear,
     selectBase: (game) => {
+      sel('#clear .title').onclick = () => game.setState(Game.title);
       return sel('#clear');
     },
     render: null,
