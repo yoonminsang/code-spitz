@@ -8,5 +8,6 @@
 - 4회차 https://ms3864.tistory.com/428
 - 5회차(2기) https://ms3864.tistory.com/430
 - 6회차(2기) https://ms3864.tistory.com/431
+- 리액트 테트리스 https://github.com/yoonminsang/react-oop-tetris
 - 5회차
 - 6회차
