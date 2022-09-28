@@ -4,6 +4,9 @@ const err = (v) => {
 // production할때는 console.log로 변경. 이방법 많이씀.
 
 const Task = class {
+  static get(title) {
+    return new Task(title);
+  }
   constructor(title, isCompleted = false) {
     this.title = title;
     this.isCompleted = isCompleted;
@@ -44,29 +47,54 @@ const Task = class {
 // 객체지향에서 내장을 깔필요가 없어. 내장 까야된다면 잘못된 코드. ㅇ
 // 호스트가 중요하지 객체는 중요하지 않다. 그냥 호스트한테 잘 가면된다.
 
-const Folder = class {
+const Folder = class extends Set {
+  // 팩토리 패턴. 생성에대한 지식을 바깥으로 노출하고 싶지 않기 때문에 존재.
+  static get(title) {
+    return new Folder(title);
+  }
   constructor(title) {
+    super();
     this.title = title;
-    this.tasks = new Set();
+    // this.tasks = new Set();
+  }
+  // move는 remove and add야.
+  // return err를 통해서 개발모드와 배포모드모두 그다음작업을 막을수있다.
+  moveTask(task, folderSrc) {
+    if (super.has(task) || !folderSrc.has(task)) return err('...');
+    folderSrc.removeTask(task);
+    this.addTask(task);
   }
   // addTask(title) {
   //   this.tasks.add(new Task(title));
   // }
   addTask(task) {
     if (!task instanceof Task) err('invalid task');
-    this.tasks.add(task);
+    super.add(task);
   }
   removeTask(task) {
     if (!task instanceof Task) err('invalid task');
-    this.tasks.delete(task);
+    super.delete(task);
   }
   // 대칭성. 켄트백. add할때 title만받는데 remove할때 title만 받으면 이상해져.
   getTasks() {
-    return [...this.tasks.values()];
+    return [...super.values()];
   }
   // 범용적인 명사 동사 등은 프레임워크나 상위 개발자들이 만들어놓는다. 우리는 구체화된 변수명을 사용하자. ex) getList. but component는 도메인적인 맥락 제거하는게 좋을때도있음.
   getTitle() {
     return this.title;
+  }
+  // 내적 동질성.(자식이 우선이라 부모꺼는 호출안돼)
+  add() {
+    err('...');
+  }
+  delete() {
+    err('...');
+  }
+  clear() {
+    err('...');
+  }
+  values() {
+    err('...');
   }
 };
 () => {
@@ -83,19 +111,31 @@ const Folder = class {
   console.log('test3', isOkay);
 };
 
-const App = class {
+const App = class extends Set {
   constructor() {
-    this.folders = new Set();
+    super();
   }
   addFolder(folder) {
     if (!folder instanceof Task) err('invalid task');
-    this.folders.add(folder);
+    super.add(folder);
   }
   removeFolder(folder) {
-    this.folders.delete(folder);
+    super.delete(folder);
   }
   getFolders() {
-    return [...this.folders.values()];
+    return [...super.values()];
+  }
+  add() {
+    err('...');
+  }
+  delete() {
+    err('...');
+  }
+  clear() {
+    err('...');
+  }
+  values() {
+    err('...');
   }
 };
 
@@ -114,42 +154,27 @@ const el = (tag) => document.createElement(tag);
 const DomRenderer = class extends Renderer {
   constructor(parent, app) {
     super(app);
-    this.el = parent.appendChild(el('section'));
-    this.el.innerHTML = `
-      <nav>
-        <input type='text'/>
-        <ul></ul>
-      </nav>
-      <section>
-        <header>
-          <h2></h2>
-          <input type='text'/>
-        </header>
-        <ul></ul>
-      </section>
-    `;
-    this.el.querySelector('nav').style.cssText = 'float:left; width:200px; border-right:1px solid #000;';
-    this.el.querySelector('section').style.cssText = 'margin-left:210px;';
-    const ul = this.el.querySelectorAll('ul');
-    this.folder = ul[0];
-    this.task = ul[1];
+    const [folder, task] = Array.from(parent.querySelectorAll('ul'));
+    this.folder = folder;
+    this.task = task;
     this.currentFolder = null;
-    const input = this.el.querySelectorAll('input');
-    input[0].addEventListener('keyup', (e) => {
+    parent.querySelector('nav>input').addEventListener('keyup', (e) => {
       if (e.keyCode !== 13) return;
       const v = e.target.value.trim();
       if (!v) return;
       // 쉴드패턴. 위에서 다 튕겨내고 아래는 동작하는 로직만있는거. 화이트 블랙처럼
-      const folder = new Folder(v);
+      // const folder = new Folder(v);
+      const folder = Folder.get(v);
       this.app.addFolder(folder);
       e.target.value = '';
       this.render();
     });
-    input[1].addEventListener('keyup', (e) => {
+    parent.querySelector('header>input').addEventListener('keyup', (e) => {
       if (e.keyCode !== 13 || !this.currentFolder) return;
       const v = e.target.value.trim();
       if (!v) return;
-      const task = new Task(v);
+      // const task = new Task(v);
+      const task = Task.get(v);
       this.currentFolder.addTask(task);
       e.target.value = '';
       this.render();
@@ -157,6 +182,7 @@ const DomRenderer = class extends Renderer {
   }
   _render() {
     const folders = this.app.getFolders();
+    let moveTask;
     if (!this.currentFolder) this.currentFolder = folders[0];
     this.folder.innerHTML = '';
     folders.forEach((folder) => {
@@ -167,6 +193,13 @@ const DomRenderer = class extends Renderer {
         this.currentFolder = folder;
         this.render();
       });
+      li.addEventListener('drop', (e) => {
+        e.preventDefault();
+        folder.moveTask(moveTask, this.currentFolder);
+      });
+      li.addEventListener('dragover', (e) => {
+        e.preventDefault();
+      });
       this.folder.appendChild(li);
     });
     if (!this.currentFolder) return;
@@ -174,15 +207,21 @@ const DomRenderer = class extends Renderer {
     this.currentFolder.getTasks().forEach((t) => {
       const li = el('li');
       const { title, isCompleted } = t.getInfo();
+      li.setAttribute('draggable', true);
       li.innerHTML = (isCompleted ? 'completed ' : 'process ') + title;
-      li.addEventListener('click', () => {
+      li.addEventListener('click', (e) => {
+        // e.preventDefault();
         t.toggle();
         this.render();
+      });
+      li.addEventListener('dragstart', (e) => {
+        // e.preventDefault();
+        moveTask = t;
       });
       this.task.appendChild(li);
     });
   }
 };
 
-new DomRenderer(document.body, new App());
+new DomRenderer(document.querySelector('main'), new App());
 // 전체 렌더는 그냥 그리면 돼. 데이터만 다루는거야. 어차피 라이브러리들이 해주는거야 그거는.
