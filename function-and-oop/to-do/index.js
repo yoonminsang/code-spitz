@@ -4,8 +4,15 @@ const err = (v) => {
 // production할때는 console.log로 변경. 이방법 많이씀.
 
 const Task = class {
+  static load(json) {
+    const task = new Task(json.title, json.isCompleted);
+    return task;
+  }
   static get(title) {
     return new Task(title);
+  }
+  toJSON() {
+    return this.getInfo();
   }
   constructor(title, isCompleted = false) {
     this.title = title;
@@ -49,8 +56,18 @@ const Task = class {
 
 const Folder = class extends Set {
   // 팩토리 패턴. 생성에대한 지식을 바깥으로 노출하고 싶지 않기 때문에 존재.
+  static load(json) {
+    const folder = new Folder(json.title);
+    json.tasks.forEach((t) => {
+      folder.addTask(Task.load(t));
+    });
+    return folder;
+  }
   static get(title) {
     return new Folder(title);
+  }
+  toJSON() {
+    return { title: this.title, tasks: this.getTasks() };
   }
   constructor(title) {
     super();
@@ -112,6 +129,16 @@ const Folder = class extends Set {
 };
 
 const App = class extends Set {
+  static load(json) {
+    const app = new App();
+    json.forEach((f) => {
+      app.addFolder(Folder.load(f));
+    });
+    return app;
+  }
+  toJSON() {
+    return this.getFolders();
+  }
   constructor() {
     super();
   }
@@ -154,7 +181,20 @@ const el = (tag) => document.createElement(tag);
 const DomRenderer = class extends Renderer {
   constructor(parent, app) {
     super(app);
+    this.taskEl = [];
     const [folder, task] = Array.from(parent.querySelectorAll('ul'));
+    const [load, save] = Array.from(parent.querySelectorAll('button'));
+    // create를 먼저해라. view, list, delete 순서.
+    load.onclick = (e) => {
+      const v = localStorage['todo'];
+      if (v) {
+        this.app = App.load(JSON.parse(v));
+        this.render();
+      }
+    };
+    save.onclick = (e) => {
+      localStorage['todo'] = JSON.stringify(this.app);
+    };
     this.folder = folder;
     this.task = task;
     this.currentFolder = null;
@@ -182,46 +222,87 @@ const DomRenderer = class extends Renderer {
   }
   _render() {
     const folders = this.app.getFolders();
-    let moveTask;
+    let moveTask, tasks;
     if (!this.currentFolder) this.currentFolder = folders[0];
-    this.folder.innerHTML = '';
+
+    let oldEl = this.folder.firstElementChild,
+      lastEl = null;
     folders.forEach((folder) => {
-      const li = el('li');
+      let li;
+      if (oldEl) {
+        li = oldEl;
+        oldEl = oldEl.nextElementSibling;
+      } else {
+        li = el('li');
+        this.folder.appendChild(li);
+        oldEl = null;
+      }
+      lastEl = li;
       li.innerHTML = folder.getTitle();
       li.style.cssText = `font-size: ${this.currentFolder === folder ? '20px' : '12px'}`;
-      li.addEventListener('click', () => {
+      li.onclick = () => {
         this.currentFolder = folder;
         this.render();
-      });
-      li.addEventListener('drop', (e) => {
+      };
+      li.ondrop = (e) => {
         e.preventDefault();
         folder.moveTask(moveTask, this.currentFolder);
-      });
-      li.addEventListener('dragover', (e) => {
+      };
+      li.ondragover = (e) => {
         e.preventDefault();
-      });
-      this.folder.appendChild(li);
+      };
     });
+    if (lastEl) {
+      while ((oldEl = this.task.firstElementChild)) {
+        this.task.removeChild(oldEl);
+        this.taskEl.push(oldEl);
+      }
+    }
     if (!this.currentFolder) return;
-    this.task.innerHTML = '';
-    this.currentFolder.getTasks().forEach((t) => {
-      const li = el('li');
-      const { title, isCompleted } = t.getInfo();
-      li.setAttribute('draggable', true);
-      li.innerHTML = (isCompleted ? 'completed ' : 'process ') + title;
-      li.addEventListener('click', (e) => {
-        // e.preventDefault();
-        t.toggle();
-        this.render();
+    tasks = this.currentFolder.getTasks();
+    if (tasks.length === 0) {
+      while (this.task.firstElementChild) {
+        this.task.removeChild(this.task.firstElementChild);
+      }
+    } else {
+      (oldEl = this.task.firstElementChild), (lastEl = null);
+      tasks.forEach((t) => {
+        let li;
+        if (oldEl) {
+          li = oldEl;
+          oldEl = oldEl.nextElementSibling;
+        } else {
+          li = this.taskEl.length ? this.taskEl.pop() : el('li');
+          this.task.appendChild(li);
+          oldEl = null;
+        }
+        lastEl = li;
+        const { title, isCompleted } = t.getInfo();
+        li.setAttribute('draggable', true);
+        li.innerHTML = (isCompleted ? 'completed ' : 'process ') + title;
+        li.addEventListener('click', (e) => {
+          // e.preventDefault();
+          t.toggle();
+          this.render();
+        });
+        li.addEventListener('dragstart', (e) => {
+          // e.preventDefault();
+          moveTask = t;
+        });
       });
-      li.addEventListener('dragstart', (e) => {
-        // e.preventDefault();
-        moveTask = t;
-      });
-      this.task.appendChild(li);
-    });
+      if (lastEl) {
+        while ((oldEl = lastEl.nextElementSibling)) {
+          this.task.removeChild(oldEl);
+          this.taskEl.push(oldEl);
+        }
+      }
+    }
   }
 };
 
 new DomRenderer(document.querySelector('main'), new App());
 // 전체 렌더는 그냥 그리면 돼. 데이터만 다루는거야. 어차피 라이브러리들이 해주는거야 그거는.
+
+// 51.38
+// 풀링. 객체 재활용
+// 증분 랜더링

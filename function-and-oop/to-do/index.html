@@ -6,23 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <style>
-      main > nav {
+      main .gnb {
+      }
+      main .folder {
         float: left;
         width: 200px;
         border-right: 1px solid #000;
       }
-      main > section {
+      main .task {
         margin-left: 210px;
       }
     </style>
   </head>
   <body>
     <main>
-      <nav>
+      <nav class="gnb">
+        <button>load</button>
+        <button>save</button>
+      </nav>
+      <nav class="folder">
         <input type="text" />
         <ul></ul>
       </nav>
-      <section>
+      <section class="task">
         <header>
           <h2></h2>
           <input type="text" />
